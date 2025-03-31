@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Hero Section -->
+<div class="hero-banner">
+    <div class="hero-overlay">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to Portfolio Tracker</h1>
+            <p class="hero-subtitle">
+                Your one-stop solution to track and validate academic achievements.
+            </p>
+            <a href="{{ url_for('upcoming_events') }}" class="button accent-button">Explore Events</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- Features Section -->
+<section class="features">
+    <h2 class="section-title">Why Choose Our Portfolio Tracker?</h2>
+    <div class="features-container">
+        <div class="feature-item">
+            <h3>Track Progress Efficiently</h3>
+            <p>
+                Our platform provides an intuitive interface to monitor your academic and extracurricular achievements. Stay organized with comprehensive tracking, detailed analytics, and a clear visual overview of your progress.
+            </p>
+        </div>
+        <div class="feature-item">
+            <h3>Reliable Faculty Verification</h3>
+            <p>
+                Every submission is carefully verified by experienced faculty members. Receive personalized feedback and ensure that your achievements are accurately documented and recognized.
+            </p>
+        </div>
+        <div class="feature-item">
+            <h3>Access Exclusive Events</h3>
+            <p>
+                Never miss an opportunity to shine! Get real-time updates on hackathons, workshops, competitions, and other events that can help you earn additional points and valuable experiences.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials">
+    <h2 class="section-title">What Our Users Say</h2>
+    <div class="testimonials-container">
+        <div class="testimonial-item">
+            <img src="{{ url_for('static', filename='images/user1.jpg') }}" alt="Testimonial 1">
+            <blockquote>
+                "This platform revolutionized how I manage my activities. It's efficient, reliable, and visually stunning!"
+            </blockquote>
+            <p>- Alex, Student</p>
+        </div>
+        <div class="testimonial-item">
+            <img src="{{ url_for('static', filename='images/user2.jpg') }}" alt="Testimonial 2">
+            <blockquote>
+                "Faculty feedback and event updates keep me engaged and motivated. I highly recommend Portfolio Tracker!"
+            </blockquote>
+            <p>- Maya, Student</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

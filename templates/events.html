@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upcoming Events - Portfolio Tracker</title>
+    <style>
+        /* Global Dark Theme */
+        body {
+            background-color: #121212;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #e4e4e4;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #ffffff;
+        }
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+        .nav-links li a {
+            color: #bbbbbb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-links li a:hover {
+            color: #ffffff;
+        }
+        
+        /* Hero Banner */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: url("{{ url_for('static', filename='images/events-hero.png') }}") no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+        .hero-content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #cccccc;
+            margin-bottom: 1.5rem;
+        }
+        .accent-button {
+            background-color: #03dac5;
+            color: #121212;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            text-decoration: none;
+        }
+        .accent-button:hover {
+            background-color: #00c0ab;
+        }
+        
+        /* Events Section */
+        .events-section {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #ffffff;
+        }
+        .events-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+        .event-card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+        .event-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .event-content {
+            padding: 1.5rem;
+        }
+        .event-content h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #03dac5;
+        }
+        .event-content p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            color: #cccccc;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            .hero-content p {
+                font-size: 1rem;
+            }
+            .events-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>Portfolio Tracker</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            {% if 'user_id' in session and session['role'] == 'student' %}
+                <li><a href="{{ url_for('student_dashboard') }}">Student Dashboard</a></li>
+            {% elif 'user_id' in session and session['role'] == 'faculty' %}
+                <li><a href="{{ url_for('faculty_dashboard') }}">Faculty Dashboard</a></li>
+            {% endif %}
+            {% if 'user_id' in session %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-overlay">
+            <div class="hero-content">
+                <h1>Upcoming Events</h1>
+                <p>Join events that help you earn points and enhance your portfolio.</p>
+                <a href="#" class="accent-button">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Section -->
+    <section class="events-section">
+        <h2 class="section-title">Explore & Earn Points</h2>
+        <div class="events-grid">
+            <!-- Event Card 1: Journal Publication (Q1/Q2) -->
+            <div class="event-card">
+                <img class="event-image" src="{{ url_for('static', filename='images/journal.jpg') }}" alt="Journal Publication">
+                <div class="event-content">
+                    <h2>Journal Publication (Q1/Q2)</h2>
+                    <p><strong>Date:</strong> 15th October 2024</p>
+                    <p><strong>Points:</strong> 50</p>
+                    <p>Submit your research paper to a Q1/Q2 journal to earn maximum points and showcase your academic excellence.</p>
+                </div>
+            </div>
+            <!-- Event Card 2: International Conference Presentation -->
+            <div class="event-card">
+                <img class="event-image" src="{{ url_for('static', filename='images/conference.jpg') }}" alt="International Conference">
+                <div class="event-content">
+                    <h2>International Conference Presentation</h2>
+                    <p><strong>Date:</strong> 5th November 2024</p>
+                    <p><strong>Points:</strong> 40</p>
+                    <p>Present your work on an international stage and gain recognition for your innovative ideas.</p>
+                </div>
+            </div>
+            <!-- Event Card 3: Blood Donation Camp -->
+            <div class="event-card">
+                <img class="event-image" src="{{ url_for('static', filename='images/blood_donation.jpg') }}" alt="Blood Donation Camp">
+                <div class="event-content">
+                    <h2>Blood Donation Camp</h2>
+                    <p><strong>Date:</strong> 20th October 2024</p>
+                    <p><strong>Points:</strong> 20</p>
+                    <p>Participate in a life-saving blood donation camp and earn points while contributing to your community.</p>
+                </div>
+            </div>
+            <!-- Event Card 4: Cultural/Hackathon Competition -->
+            <div class="event-card">
+                <img class="event-image" src="{{ url_for('static', filename='images/hackathon.jpg') }}" alt="Hackathon/Cultural Event">
+                <div class="event-content">
+                    <h2>Cultural/Hackathon Competition</h2>
+                    <p><strong>Date:</strong> 30th October 2024</p>
+                    <p><strong>Points:</strong> 30</p>
+                    <p>Show your creativity and skills by participating in our cultural or hackathon events designed to challenge and inspire you.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

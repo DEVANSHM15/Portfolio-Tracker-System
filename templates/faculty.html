@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <style>
+        /* Global Dark Theme */
+        body {
+            background-color: #121212;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #e4e4e4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #ffffff;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links li a {
+            color: #bbbbbb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .nav-links li a:hover {
+            color: #ffffff;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .dashboard-subtitle {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            color: #cccccc;
+        }
+
+        /* Search Bar */
+        .search-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-container input {
+            width: 50%;
+            padding: 0.7rem;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            color: #e4e4e4;
+        }
+
+        /* Faculty Grid */
+        .faculty-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .faculty-card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 320px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .faculty-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .faculty-card h3 {
+            margin-top: 0;
+            color: #03dac5;
+            margin-bottom: 0.5rem;
+        }
+
+        .faculty-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .faculty-card a {
+            color: #03dac5;
+            text-decoration: none;
+        }
+
+        .faculty-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Feedback Form */
+        .faculty-card form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1rem;
+        }
+
+        .faculty-card form label {
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+
+        .faculty-card form textarea {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #e4e4e4;
+            min-height: 60px;
+        }
+
+        .faculty-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .approve-button {
+            background-color: #03dac5;
+            color: #121212;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .approve-button:hover {
+            background-color: #00c0ab;
+        }
+
+        .reject-button {
+            background-color: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .reject-button:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>Portfolio Tracker</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <h2 class="dashboard-title">Faculty Dashboard</h2>
+        <p class="dashboard-subtitle">Review pending submissions and provide feedback.</p>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchUSN" placeholder="Search by USN..." onkeyup="filterByUSN()">
+        </div>
+
+        {% if activities %}
+        <div class="faculty-grid">
+            {% for activity in activities %}
+            <div class="faculty-card">
+                <h3>{{ activity.title }}</h3>
+                <p><strong>Student:</strong> {{ activity.student.name if activity.student else "Unknown"}}</p>
+                <p><strong>USN:</strong> {{ activity.student.usn }}</p>
+                <p><strong>Type:</strong> {{ activity.activity_type }}</p>
+                <p><strong>Description:</strong> {{ activity.description }}</p>
+                <p><strong>Proof:</strong>
+                    <a href="{{ url_for('uploaded_file', filename=activity.proof) }}" target="_blank">View Proof</a>
+                </p>
+
+                {% if activity.status == 'pending' %}
+                <form method="POST" action="{{ url_for('faculty_dashboard') }}">
+                    <input type="hidden" name="activity_id" value="{{ activity.id }}">
+                    <label>Feedback</label>
+                    <textarea name="feedback" placeholder="Enter feedback here"></textarea>
+                    <div class="faculty-actions">
+                        <button type="submit" name="action" value="approve" class="approve-button">Approve</button>
+                        <button type="submit" name="action" value="reject" class="reject-button">Reject</button>
+                    </div>
+                </form>
+                {% else %}
+                <p><strong>Status:</strong> ✅ {{ activity.status.capitalize() }}</p>
+                <p><strong>Portfolio Points:</strong> {{ activity.student_points }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No submissions available.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterByUSN() {
+            let input = document.getElementById("searchUSN").value.toUpperCase();
+            let cards = document.querySelectorAll(".faculty-card");
+
+            cards.forEach(card => {
+                let usnElement = card.querySelector("p:nth-child(3)");
+                if (usnElement && usnElement.innerText.toUpperCase().includes(input)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            let approveButtons = document.querySelectorAll(".approve-button");
+
+            approveButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000); // Reload after 1 second to fetch updated data
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

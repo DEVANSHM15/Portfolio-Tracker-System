@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="dark-body">
+    <nav class="navbar">
+        <h1>Portfolio Tracker</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            {% if 'user_id' in session %}
+                {% if session['role'] == 'student' %}
+                    <li><a href="{{ url_for('student_dashboard') }}">Dashboard</a></li>
+                    <li><a href="{{ url_for('upcoming_events') }}">Upcoming Events</a></li>
+                {% elif session['role'] == 'faculty' %}
+                    <li><a href="{{ url_for('faculty_dashboard') }}">Faculty Dashboard</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <div class="container dark-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

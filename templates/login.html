@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Portfolio Tracker</title>
+    <style>
+        /* Global Dark Theme */
+        body {
+            background-color: #121212;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #e4e4e4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #ffffff;
+        }
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+        .nav-links li a {
+            color: #bbbbbb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-links li a:hover {
+            color: #ffffff;
+        }
+
+        /* Login Card Container */
+        .login-container {
+            max-width: 500px; /* Increased width */
+            margin: 5rem auto;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+            padding: 2rem;
+        }
+
+        /* Title */
+        .login-container h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        /* Flash Messages */
+        .flash {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .flash.success {
+            background-color: #1a5e2a;
+            color: #a3f9b3;
+        }
+        .flash.error {
+            background-color: #5e1a1a;
+            color: #f9a3a3;
+        }
+        .flash.info {
+            background-color: #1a1d5e;
+            color: #a3a7f9;
+        }
+
+        /* Form Styles */
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form label {
+            margin-top: 1rem;
+            font-weight: 500;
+            color: #e4e4e4;
+        }
+        form input {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #e4e4e4;
+        }
+        form input::placeholder {
+            color: #888888;
+        }
+
+        /* Button */
+        .button {
+            background-color: #03dac5;
+            color: #121212;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .button:hover {
+            background-color: #00c0ab;
+        }
+
+        /* Link Text */
+        .link-text {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .link-accent {
+            color: #03dac5;
+            text-decoration: none;
+        }
+        .link-accent:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>Portfolio Tracker</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <h2>Login</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message|safe }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <label>Email:</label>
+            <input type="email" name="email" placeholder="you@rvu.edu.in" required>
+            
+            <label>Password:</label>
+            <input type="password" name="password" placeholder="••••••" required>
+            
+            <button type="submit" class="button">Login</button>
+        </form>
+        
+        <p class="link-text">
+            Not registered? <a href="{{ url_for('register') }}" class="link-accent">Sign up here</a>.
+        </p>
+    </div>
+</body>
+</html>

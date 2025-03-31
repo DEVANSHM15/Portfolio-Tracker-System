@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <style>
+        /* Global Dark Theme */
+        body {
+            background: linear-gradient(135deg, #61f4de, #6e78ff);
+            background-blend-mode: hard-light;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #e4e4e4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #ffffff;
+        }
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+        }
+        .nav-links li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-links li a:hover {
+            color: #ffffff;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+        .dashboard-title {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: #000000;
+        }
+        .dashboard-subtitle {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #000000;
+        }
+
+        /* Cards */
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #03dac5;
+            margin-bottom: 1rem;
+        }
+
+        /* Submission Form */
+        .submission-form form {
+            display: flex;
+            flex-direction: column;
+        }
+        .submission-form form label {
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+        .submission-form form input[type="text"],
+        .submission-form form textarea,
+        .submission-form form select {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #e4e4e4;
+        }
+        .submission-form form textarea {
+            min-height: 80px;
+        }
+        .submission-form form input[type="file"] {
+            margin-top: 1rem;
+        }
+        .submission-form form button {
+            background-color: #03dac5;
+            color: #121212;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .submission-form form button:hover {
+            background-color: #00c0ab;
+        }
+
+        /* Alert for 100 points */
+        .alert {
+            background-color: #2a2a2a;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Activity List */
+        .activity-list table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .activity-list table th,
+        .activity-list table td {
+            padding: 0.75rem;
+            border: 1px solid #444444;
+        }
+        .activity-list table th {
+            background-color: #2a2a2a;
+            color: #03dac5;
+            font-weight: 600;
+        }
+        .activity-list table td a {
+            color: #03dac5;
+            text-decoration: none;
+        }
+        .activity-list table td a:hover {
+            text-decoration: underline;
+        }
+
+        /* Delete Button */
+        .delete-button {
+            background-color: #ef4444;
+            color: #ffffff;
+            margin-top: 0.5rem;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .delete-button:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <h1>Portfolio Tracker</h1>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('upcoming_events') }}">Upcoming Events</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <h2 class="dashboard-title">Welcome, {{ user.name }}</h2>
+        <p class="dashboard-subtitle">You have earned <strong>{{ user.points }}</strong> points so far.</p>
+        
+        {% if user.points < 100 %}
+        <div class="card submission-form">
+            <h3>Submit New Activity</h3>
+            <form method="POST" action="{{ url_for('submit_activity') }}" enctype="multipart/form-data">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="Activity Title" required>
+                
+                <label>Description</label>
+                <textarea name="description" placeholder="Describe your activity" required></textarea>
+                
+                <label>Activity Type</label>
+                <select name="activity_type" required>
+                    <option value="">-- Select Activity --</option>
+                    <option value="journal_q1q2">Journal Publication (Q1/Q2) - 50 pts</option>
+                    <option value="journal_q3">Journal Publication (Q3) - 40 pts</option>
+                    <option value="journal_q4">Journal Publication (Q4) - 30 pts</option>
+                    <option value="best_paper_award">Best Paper Award - 50 pts</option>
+                    <option value="Conf_presentation_international">International Conference - 40 pts</option>
+                    <option value="Conf_presentation_national">National Conference - 25 pts</option>
+                    <option value="Winners_international">Winners (Intl) - 50 pts</option>
+                    <option value="Winners_national">Winners (National) - 40 pts</option>
+                    <option value="Winners_intercollege">Winners (Intercollege) - 30 pts</option>
+                    <option value="Winner_college">Winner (College) - 20 pts</option>   
+                    <option value="Participation_Internation">Participation (International) - 40 pts</option>
+                    <option value="Participation_National">Participation (National) - 30 pts</option>
+                    <option value="Participation_Intercollege">Participation (Intercollege) - 20 pts</option>
+                    <option value="Participation_college">Participation (Intercollege) - 10 pts</option>
+                    <option value="Cultural_participation">Cultural/Sports/Hackathon - 30 pts</option>
+                    <option value="Blood_donation">Blood Donation - 20 pts</option>
+                    <option value="Community_service">Community Service - 10 pts</option>
+                    <option value="Industrial_visit">Industrial Visit - 20 pts</option>
+                    <option value="Organize_event">Organize Event - 20 pts</option>
+                </select>
+                
+                <label>Upload Proof</label>
+                <input type="file" name="proof" required>
+                
+                <button type="submit">Submit Activity</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="alert">
+            <p>You have reached 100 points. No further submissions are allowed.</p>
+        </div>
+        {% endif %}
+        
+        <div class="card activity-list">
+            <h3>Your Submissions</h3>
+            {% if activities %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Proof</th>
+                        <th>Status</th>
+                        <th>Feedback</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr>
+                        <td>{{ activity.title }}</td>
+                        <td>{{ activity.activity_type }}</td>
+                        <td><a href="{{ url_for('uploaded_file', filename=activity.proof) }}" target="_blank">View</a></td>
+                        <td>{{ activity.status }}</td>
+                        <td>{{ activity.feedback or 'N/A' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('delete_activity', activity_id=activity.id) }}">
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No submissions yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
