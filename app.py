@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory,abort,request
 from flask_migrate import Migrate
 from database import db, init_db, User, Activity, POINTS_MAP
 import os
@@ -146,10 +146,24 @@ def submit_activity():
     db.session.commit()
     flash('Activity submitted successfully! Awaiting approval.', 'success')
     return redirect(url_for('student_dashboard'))
+app.config['UPLOAD_FOLDER'] = 'uploads'  
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
+
+def uploaded_file(filename):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if not os.path.exists(file_path):
+        abort(404)  # Return 404 if file is not found
+    
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+def get_uploaded_file(filename):
+    return uploaded_file(filename)
+
+# Handling large file error
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return "File too large! Maximum allowed size is 2MB.", 413
 
 @app.route('/faculty', methods=['GET', 'POST'])
 def faculty_dashboard():
