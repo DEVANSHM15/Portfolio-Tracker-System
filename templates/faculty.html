@@ -238,7 +238,37 @@
         <p>No submissions available.</p>
         {% endif %}
     </div>
+    <form method="GET" action="{{ url_for('faculty_dashboard') }}">
+        <label for="usn_batch">Select USN Batch:</label>
+        <select name="usn_batch" id="usn_batch" onchange="this.form.submit()">
+            {% if usn_batches %}
+            {% for index in range(usn_batches|length) %}
+            <option value="{{ index }}" {% if index==selected_batch %} selected {% endif %}>
+                Batch {{ index + 1 }} ({{ usn_batches[index][0] }} - {{ usn_batches[index][-1] }})
+            </option>
+            {% endfor %}
+            {% else %}
+            <option value="">No batches available</option>
+            {% endif %}
+        </select>
+    </form>
 
+    <!-- USN Selection -->
+    <form method="GET" action="{{ url_for('faculty_dashboard') }}">
+        <input type="hidden" name="usn_batch" value="{{ selected_batch }}">
+        <label for="search_usn">Select USN:</label>
+        <select name="search_usn" id="search_usn">
+            {% if usn_options %}
+            <option value="">-- Select USN --</option>
+            {% for usn in usn_options %}
+            <option value="{{ usn }}" {% if search_usn==usn %} selected {% endif %}>{{ usn }}</option>
+            {% endfor %}
+            {% else %}
+            <option value="">No USNs available</option>
+            {% endif %}
+        </select>
+        <button type="submit">Search</button>
+    </form>
     <script>
         function filterByUSN() {
             let input = document.getElementById("searchUSN").value.toUpperCase();

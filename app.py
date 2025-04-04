@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from database import db, init_db, User, Activity, POINTS_MAP
 import os
 import re
+from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
@@ -115,6 +116,7 @@ def student_dashboard():
     db.session.refresh(user)  # Refresh user data
     if user.points >= 100:
         flash('You have reached 100 points and cannot submit more activities.', 'info')
+    
     activities = Activity.query.filter_by(student_id=user.id).all()
     return render_template('student.html', user=user, activities=activities)
 
@@ -130,8 +132,10 @@ def submit_activity():
     # Handle file upload
     file = request.files['proof']
     filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
+    user_uploads_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))  # User-specific folder
+    os.makedirs(user_uploads_folder, exist_ok=True)  # Create the user's directory if it doesn't exist
+    file_path = os.path.join(user_uploads_folder, filename)  # Full file path to save the file
+    file.save(file_path) 
 
     # Create new activity
     new_activity = Activity(
@@ -149,21 +153,15 @@ def submit_activity():
 app.config['UPLOAD_FOLDER'] = 'uploads'  
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 
+@app.route('/uploads/<user_id>/<filename>')
+@app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    if not os.path.exists(file_path):
-        abort(404)  # Return 404 if file is not found
-    
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/uploads/<filename>')
-def get_uploaded_file(filename):
-    return uploaded_file(filename)
-
-# Handling large file error
-@app.errorhandler(413)
-def request_entity_too_large(error):
-    return "File too large! Maximum allowed size is 2MB.", 413
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_file_error(error):
+    flash('File is too large. Maximum size is 2MB.', 'error')
+    return redirect(url_for('student_dashboard'))  # Redirect to a page (like the dashboard) where the user can try again.
 
 @app.route('/faculty', methods=['GET', 'POST'])
 def faculty_dashboard():
@@ -249,4 +247,4 @@ def delete_activity(activity_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

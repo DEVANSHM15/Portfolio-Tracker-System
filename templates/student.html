@@ -216,7 +216,7 @@
                 </select>
                 
                 <label>Upload Proof</label>
-                <input type="file" name="proof" required>
+                <input type="file" name="proof" required accept=".pdf,.jpg,.jpeg,.png">
                 
                 <button type="submit">Submit Activity</button>
             </form>
@@ -264,5 +264,17 @@
             {% endif %}
         </div>
     </div>
+    
+    <!-- JavaScript to Check File Size -->
+<script>
+    document.getElementById("proof").addEventListener("change", function() {
+        var file = this.files[0];
+        if (file && file.size > 2 * 1024 * 1024) { // 2MB limit
+            alert("File size exceeds 2MB! Please upload a smaller file.");
+            this.value = ""; // Reset file input
+        }
+    });
+</script>
+
 </body>
 </html>
