@@ -2,8 +2,9 @@
 <html>
 <head>
     <title>Student Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        /* Global Dark Theme */
+        /* Global Dark Theme - Only keeping styles not in styles.css */
         body {
             background: linear-gradient(135deg, #61f4de, #6e78ff);
             background-blend-mode: hard-light;
@@ -166,6 +167,63 @@
     </style>
 </head>
 <body>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Help Desk Button -->
+    <button class="help-desk-btn" onclick="toggleHelpDesk()" title="Help Desk">
+        <i class="fas fa-question"></i>
+    </button>
+    
+    <!-- Help Desk Modal -->
+    <div class="help-desk-modal" id="helpDeskModal">
+        <div class="help-desk-header">
+            <i class="fas fa-life-ring"></i>
+            <span>Help Center</span>
+        </div>
+        <div class="help-desk-content" id="qaContainer"></div>
+    </div>
+    
+    <script>
+        function toggleHelpDesk() {
+            const modal = document.getElementById('helpDeskModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+            
+            // Load Q&A if not already loaded
+            if (modal.style.display === 'block' && !modal.dataset.loaded) {
+                fetch('/helpdesk/qa')
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('qaContainer');
+                        container.innerHTML = '';
+                        
+                        data.forEach(qa => {
+                            const qaItem = document.createElement('div');
+                            qaItem.className = 'qa-item';
+                            
+                            const question = document.createElement('div');
+                            question.className = 'qa-question';
+                            question.textContent = qa.question;
+                            question.onclick = function() {
+                                this.classList.toggle('active');
+                                const answer = this.nextElementSibling;
+                                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+                            };
+                            
+                            const answer = document.createElement('div');
+                            answer.className = 'qa-answer';
+                            answer.textContent = qa.answer;
+                            
+                            qaItem.appendChild(question);
+                            qaItem.appendChild(answer);
+                            container.appendChild(qaItem);
+                        });
+                        
+                        modal.dataset.loaded = 'true';
+                    });
+            }
+        }
+    </script>
     <!-- Navbar -->
     <nav class="navbar">
         <h1>Portfolio Tracker</h1>
@@ -204,7 +262,7 @@
                     <option value="Winners_national">Winners (National) - 40 pts</option>
                     <option value="Winners_intercollege">Winners (Intercollege) - 30 pts</option>
                     <option value="Winner_college">Winner (College) - 20 pts</option>   
-                    <option value="Participation_Internation">Participation (International) - 40 pts</option>
+                    <option value="Participation_International">Participation (International) - 40 pts</option>
                     <option value="Participation_National">Participation (National) - 30 pts</option>
                     <option value="Participation_Intercollege">Participation (Intercollege) - 20 pts</option>
                     <option value="Participation_college">Participation (Intercollege) - 10 pts</option>

@@ -47,6 +47,12 @@ class Activity(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     student = db.relationship('User', backref=db.backref('activities', lazy=True))
 
+class HelpDeskQA(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(500), nullable=False)
+    answer = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+
 def init_db(app):
     db.init_app(app)
     with app.app_context():

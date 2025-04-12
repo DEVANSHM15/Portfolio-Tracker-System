@@ -1,7 +1,7 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory,abort,request
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory,abort,request, jsonify
 from flask_migrate import Migrate
-from database import db, init_db, User, Activity, POINTS_MAP
+from database import db, init_db, User, Activity, HelpDeskQA,POINTS_MAP
 import os
 import re
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -120,6 +120,16 @@ def student_dashboard():
     activities = Activity.query.filter_by(student_id=user.id).all()
     return render_template('student.html', user=user, activities=activities)
 
+@app.route('/helpdesk/qa')
+def helpdesk_qa():
+    qa_data = HelpDeskQA.query.all()
+    return jsonify([{
+        'id': qa.id,
+        'question': qa.question,
+        'answer': qa.answer,
+        'category': qa.category
+    } for qa in qa_data])
+
 @app.route('/submit', methods=['POST'])
 def submit_activity():
     if 'user_id' not in session:
@@ -132,10 +142,8 @@ def submit_activity():
     # Handle file upload
     file = request.files['proof']
     filename = secure_filename(file.filename)
-    user_uploads_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(user.id))  # User-specific folder
-    os.makedirs(user_uploads_folder, exist_ok=True)  # Create the user's directory if it doesn't exist
-    file_path = os.path.join(user_uploads_folder, filename)  # Full file path to save the file
-    file.save(file_path) 
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
 
     # Create new activity
     new_activity = Activity(
@@ -162,7 +170,6 @@ def uploaded_file(filename):
 def handle_large_file_error(error):
     flash('File is too large. Maximum size is 2MB.', 'error')
     return redirect(url_for('student_dashboard'))  # Redirect to a page (like the dashboard) where the user can try again.
-
 @app.route('/faculty', methods=['GET', 'POST'])
 def faculty_dashboard():
     if 'role' not in session or session['role'] != 'faculty':
@@ -177,20 +184,21 @@ def faculty_dashboard():
         activity = Activity.query.get(activity_id)
         if activity:
             student = User.query.get(activity.student_id)
-            
+
             if action == 'approve':
                 activity.status = 'approved'
                 allocated_points = POINTS_MAP.get(activity.activity_type, 0)
 
                 if student:
-                    print(f"Before Update: Student {student.id} Points = {student.points}")  # Debugging
+                    print(f"Before Update: Student {student.id} Points = {student.points}")
                     student.points = (student.points or 0) + allocated_points
                     activity.points = allocated_points
                     db.session.commit()
-                    db.session.refresh(student)  
-                    print(f"After Update: Student {student.id} Points = {student.points}")  # Debugging
+                    db.session.refresh(student)
+                    print(f"After Update: Student {student.id} Points = {student.points}")
+
                 activity.feedback = feedback
-                db.session.commit()  # Commit activity status update
+                db.session.commit()
                 flash(f'Activity approved! {allocated_points} points awarded.', 'success')
 
             elif action == 'reject':
@@ -198,21 +206,61 @@ def faculty_dashboard():
                 activity.feedback = feedback
                 db.session.commit()
                 flash('Activity rejected.', 'error')
-        
+
+    # --- Filtering Logic ---
     search_query = request.args.get('search_usn', '').strip().upper()
-    activities = Activity.query.all()
-    # Fetch updated student points for each activity
-    for activity in activities:
-        db.session.refresh(activity)  # Refresh activity data
-        student = User.query.get(activity.student_id)  
-        activity.student_points = student.points if student else 0  # Store latest student points
+    from_usn = request.args.get('from_usn', '').strip().upper()
+    to_usn = request.args.get('to_usn', '').strip().upper()
 
-    if search_query:
-        activities = [activity for activity in activities if activity.student.usn == search_query]
-        if not activities:
-            flash('No records found for this USN.', 'info')
+    all_activities = Activity.query.all()
+    filtered_activities = []
 
-    return render_template('faculty.html', activities=activities)
+    for activity in all_activities:
+        student = User.query.get(activity.student_id)
+        if not student:
+            continue
+        
+        usn = student.usn.upper()
+        last_three = usn[-3:] if len(usn) >= 3 else usn
+
+        # --- Exact Match or Last 3 Digits Match for Search ---
+        match_search = False
+        if not search_query:  # No search query, match all
+            match_search = True
+        elif len(search_query) == 3:  # Last 3 digits match
+            match_search = last_three == search_query
+        else:  # Full USN match
+            match_search = usn == search_query
+
+        # --- From USN filter (Exact or Last 3 Digits) ---
+        match_from = False
+        if not from_usn:  # No "from" filter
+            match_from = True
+        elif len(from_usn) == 3:  # From USN is last 3 digits
+            match_from = last_three >= from_usn
+        else:  # Full "from" USN match
+            match_from = usn >= from_usn
+
+        # --- To USN filter (Exact or Last 3 Digits) ---
+        match_to = False
+        if not to_usn:  # No "to" filter
+            match_to = True
+        elif len(to_usn) == 3:  # To USN is last 3 digits
+            match_to = last_three <= to_usn
+        else:  # Full "to" USN match
+            match_to = usn <= to_usn
+
+        # If all conditions match, add activity to filtered list
+        if match_search and match_from and match_to:
+            activity.student = student  # Attach student for template
+            activity.student_points = student.points or 0
+            filtered_activities.append(activity)
+
+    if not filtered_activities:
+        flash('No records found matching the filter criteria.', 'info')
+
+    return render_template('faculty.html', activities=filtered_activities)
+
 
 @app.route('/delete_activity/<int:activity_id>', methods=['POST'])
 def delete_activity(activity_id):

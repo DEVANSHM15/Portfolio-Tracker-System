@@ -198,11 +198,24 @@
     <div class="dashboard-container">
         <h2 class="dashboard-title">Faculty Dashboard</h2>
         <p class="dashboard-subtitle">Review pending submissions and provide feedback.</p>
+        
+        
 
-        <!-- Search Bar -->
-        <div class="search-container">
-            <input type="text" id="searchUSN" placeholder="Search by USN..." onkeyup="filterByUSN()">
+       <!-- Filter Controls -->
+<div class="search-container">
+    <form method="GET" action="{{ url_for('faculty_dashboard') }}">
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <input type="text" name="search_usn" placeholder="Search exact or last 3 digits..." 
+                   value="{{ request.args.get('search_usn', '') }}">
+            <input type="text" name="from_usn" placeholder="From USN..." 
+                   value="{{ request.args.get('from_usn', '') }}">
+            <input type="text" name="to_usn" placeholder="To USN..." 
+                   value="{{ request.args.get('to_usn', '') }}">
+            <button type="submit" style="padding: 0.7rem 1.5rem;">Filter</button>
         </div>
+    </form>
+</div>
+
 
         {% if activities %}
         <div class="faculty-grid">
@@ -238,37 +251,7 @@
         <p>No submissions available.</p>
         {% endif %}
     </div>
-    <form method="GET" action="{{ url_for('faculty_dashboard') }}">
-        <label for="usn_batch">Select USN Batch:</label>
-        <select name="usn_batch" id="usn_batch" onchange="this.form.submit()">
-            {% if usn_batches %}
-            {% for index in range(usn_batches|length) %}
-            <option value="{{ index }}" {% if index==selected_batch %} selected {% endif %}>
-                Batch {{ index + 1 }} ({{ usn_batches[index][0] }} - {{ usn_batches[index][-1] }})
-            </option>
-            {% endfor %}
-            {% else %}
-            <option value="">No batches available</option>
-            {% endif %}
-        </select>
-    </form>
-
-    <!-- USN Selection -->
-    <form method="GET" action="{{ url_for('faculty_dashboard') }}">
-        <input type="hidden" name="usn_batch" value="{{ selected_batch }}">
-        <label for="search_usn">Select USN:</label>
-        <select name="search_usn" id="search_usn">
-            {% if usn_options %}
-            <option value="">-- Select USN --</option>
-            {% for usn in usn_options %}
-            <option value="{{ usn }}" {% if search_usn==usn %} selected {% endif %}>{{ usn }}</option>
-            {% endfor %}
-            {% else %}
-            <option value="">No USNs available</option>
-            {% endif %}
-        </select>
-        <button type="submit">Search</button>
-    </form>
+   
     <script>
         function filterByUSN() {
             let input = document.getElementById("searchUSN").value.toUpperCase();
