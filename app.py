@@ -5,6 +5,7 @@ from database import db, init_db, User, Activity, HelpDeskQA,POINTS_MAP
 import os
 import re
 from werkzeug.exceptions import RequestEntityTooLarge
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
