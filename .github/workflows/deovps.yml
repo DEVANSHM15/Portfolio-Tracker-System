@@ -1,5 +1,4 @@
 name: DevOps CI - Docker + Linting
-
 on: [push, pull_request]
 
 jobs:
