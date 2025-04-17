@@ -5,7 +5,6 @@ from database import db, init_db, User, Activity, HelpDeskQA,POINTS_MAP
 import os
 import re
 from werkzeug.exceptions import RequestEntityTooLarge
-
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
@@ -166,7 +165,6 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB limit
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(error):
     flash('File is too large. Maximum size is 2MB.', 'error')
@@ -176,6 +174,7 @@ def faculty_dashboard():
     if 'role' not in session or session['role'] != 'faculty':
         flash('Unauthorized access.', 'error')
         return redirect(url_for('login'))
+    
 
     if request.method == 'POST':
         action = request.form.get('action')
