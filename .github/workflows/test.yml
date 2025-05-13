@@ -15,6 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/test-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -33,6 +40,13 @@ jobs:
     needs: lint
     steps:
       - uses: actions/checkout@v3
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/test-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -44,7 +58,7 @@ jobs:
           pip install -r test-requirements.txt
       - name: Run sanity tests
         run: |
-          pytest -m "sanity" --maxfail=1 --disable-warnings -q --junitxml=sanity-results.xml
+          pytest -m "sanity" -v --maxfail=1 --disable-warnings --junitxml=sanity-results.xml
       - name: Upload sanity test results
         uses: actions/upload-artifact@v3
         with:
@@ -56,6 +70,13 @@ jobs:
     needs: sanity
     steps:
       - uses: actions/checkout@v3
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/test-requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -67,7 +88,7 @@ jobs:
           pip install -r test-requirements.txt
       - name: Run regression tests with coverage
         run: |
-          coverage run -m pytest --junitxml=regression-results.xml
+          coverage run -m pytest -v --junitxml=regression-results.xml
           coverage report -m
           coverage xml
       - name: Upload regression test results

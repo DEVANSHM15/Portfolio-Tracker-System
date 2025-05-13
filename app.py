@@ -17,7 +17,7 @@ migrate = Migrate(app, db)
 init_db(app)
 
 def is_rvu_email(email):
-    return re.match(r"^[a-zA-Z0-9._%+-]+@rvu\.edu\.in$", email)
+    return bool(re.match(r"^[a-zA-Z0-9._%+-]+@rvu\.edu\.in$", email, re.IGNORECASE))
 
 @app.route('/')
 def home():
